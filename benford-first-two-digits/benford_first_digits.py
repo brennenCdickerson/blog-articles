@@ -9,3 +9,5 @@ plt.plot(first_two_digits, benford_frequencies)
 plt.xticks(np.arange(10, 91, 10))
 plt.xlim(left=10)
 plt.show()
+
+print("t")
