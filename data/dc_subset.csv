@@ -1,3 +1,4 @@
+AGENCY,TRANSACTION_DATE,TRANSACTION_AMOUNT,VENDOR_NAME,VENDOR_STATE_PROVINCE,MCC_DESCRIPTION,DCS_LAST_MOD_DTTM,OBJECTID
 DC Public Library,2009/01/13 05:00:00+00,224,DOCUMENT MANAGERS,DC,"Office,Photographic,Photocopy,and Microfilm Equip",2009/04/28 20:57:32+00,717
 Office of Partnership & Grant Services,2009/01/13 05:00:00+00,358.5,THOMPSN PUBL/800-677-3,FL,Business Services Not Elsewhere Classified,2009/04/28 20:57:32+00,718
 Fire & Emergency Medical Services,2009/01/12 05:00:00+00,789.44,MA STOCKSTILL CO,MD,Repair Shops and Related Services - Miscellaneous,2009/04/28 20:57:32+00,719
