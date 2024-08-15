@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-from utils import extract_first_digits
+from utils import extract_first_digits, create_missing_values
 
 # Create list of all possible first two digit combinations from 10 to 99
 first_two_digits = np.arange(10, 100)
@@ -23,14 +23,10 @@ purchases_df = purchases_df.map(extract_first_digits)
 # Count occurences of first two digit combinations and convert to proportion of the total count
 actual_proportions = purchases_df.value_counts(normalize=True)
 
-# TODO Loop over series.items to catch any missing indices and insert zero value
+# If any specific first two digit combinations are missing from the data, create a series with the digit combo as index and 0 as the proportion.
+missing_proportions = create_missing_values(first_two_digits, actual_proportions)
 
-
-
-
-print(purchases_df)
-print(actual_proportions)
-
+print(missing_proportions)
 
 '''plt.plot(first_two_digits, benford_frequencies)
 plt.xticks(np.arange(10, 91, 10))
