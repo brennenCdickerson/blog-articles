@@ -27,7 +27,7 @@ def create_graph(digits, expected, actual, mad, bar_color="silver", line_color="
     bins = digits
     values = actual
     ax.bar(bins, values, color=bar_color, label="Actual Frequencies")
-    plt.plot(digits, expected, color=line_color, label="Benford's Law Expectation")
+    ax.plot(digits, expected, color=line_color, label="Benford's Law Expectation")
     ax.legend()
     ax.text(x=55, y=0.035, s=f'MAD: {mad:.4f}')
     plt.xticks(np.arange(10, 91, 10))
