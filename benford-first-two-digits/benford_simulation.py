@@ -19,7 +19,7 @@ def calculate_mad(data):
 
     for idx, digits in enumerate(first_two_digits):
         if digits in keys:
-            deviation = benford_frequencies[idx] - data.get(digits)
+            deviation = data.get(digits) - benford_frequencies[idx]
             abs_deviation.append(abs(deviation))
         else:
             deviation = benford_frequencies[idx]
@@ -31,12 +31,15 @@ def calculate_mad(data):
 # Simulation configuration variables
 count = 0
 num_trials = 1000
-origin_size = 5000
-origin_threshold = 0.0022
+origin_size = 42221
+origin_threshold = 0.0019
 
 # Main simulation loop
 
-#TODO pass simulated data to calculate_mad(), increment count if threshold exceeded, test main loop AND TEST MAD FUNCTION
-
 for _ in range(num_trials):
     simulated_data = roll_new_dataset(origin_size)
+    mad = calculate_mad(simulated_data)
+    print(mad)
+    if mad >= origin_threshold:
+        count +=1
+

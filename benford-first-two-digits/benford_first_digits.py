@@ -16,6 +16,7 @@ file_name = root_dir / "data" / "purchasing_card_2023.csv"
 
 # Initial read of purchasing card transaction amounts, only using financial amounts
 purchases_df = pd.read_csv(file_name, usecols=["TRANSACTION_AMOUNT"])
+size = purchases_df.size
 
 # Extract first two digits from transaction amounts
 purchases_df = purchases_df.map(extract_first_digits)
@@ -35,8 +36,12 @@ else:
 
 # Create dataframe from lists / pandas series, create calculated column showing deviation from expected, calculate MAD
 benford_df = pd.DataFrame(data=d)
-benford_df["ABSOLUTE_DEVIATION"] = (abs(benford_df["EXPECTED_FREQUENCIES"] - benford_df["ACTUAL_FREQUENCIES"]))
+benford_df["ABSOLUTE_DEVIATION"] = (abs(benford_df["ACTUAL_FREQUENCIES"] - benford_df["EXPECTED_FREQUENCIES"]))
+benford_df["Z_STATISTIC"] = ((abs(benford_df["ACTUAL_FREQUENCIES"] - benford_df["EXPECTED_FREQUENCIES"]) - (1 / (2 * size)))
+                              / np.sqrt((benford_df["EXPECTED_FREQUENCIES"] * (1 - benford_df["EXPECTED_FREQUENCIES"])) / size ))
 mean_absolute_deviation = benford_df["ABSOLUTE_DEVIATION"].mean()
+
+benford_df.to_csv("testoutput.csv")
 
 # Create graph with Benford's Law line over histogram of actual occurences
 create_graph(benford_df["FIRST_TWO_DIGITS"], benford_df["EXPECTED_FREQUENCIES"], 
