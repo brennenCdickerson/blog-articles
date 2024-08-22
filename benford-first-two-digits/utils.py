@@ -17,9 +17,9 @@ def create_missing_values(full_set, partial_set):
         else:
             missing_digit_combinations.append(digits)
 
-    missing_proportions = np.zeros(len(missing_digit_combinations))
+    missing_fill = np.zeros(len(missing_digit_combinations))
 
-    return pd.Series(missing_proportions, missing_digit_combinations)
+    return pd.Series(missing_fill, missing_digit_combinations)
 
 
 def create_graph(digits, expected, actual, mad, bar_color="silver", line_color="darkblue"):

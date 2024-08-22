@@ -13,33 +13,48 @@ def roll_new_dataset(size):
     return simulated_proportions
 
 # Calculate mean absolute deviation of a single simulated dataset
-def calculate_mad(data):
+def measure_conformity(data, size, critical_value):
     abs_deviation = []
+    z_statistics = []
     keys = data.keys()
 
     for idx, digits in enumerate(first_two_digits):
+
+        expected = benford_frequencies[idx]
+
         if digits in keys:
-            deviation = data.get(digits) - benford_frequencies[idx]
-            abs_deviation.append(abs(deviation))
+            actual = data.get(digits)
+
         else:
-            deviation = benford_frequencies[idx]
-            abs_deviation.append(deviation)
+            actual = 0
+        
+        deviation = abs(actual - expected)
+        abs_deviation.append(deviation)
+        z_statistic = (deviation - (1 / (2 * size))) / np.sqrt((expected * (1 - expected)) / size)
+
+        if z_statistic >= critical_value:
+            z_statistics.append(z_statistic)
 
     mad = np.average(abs_deviation)
-    return mad
+
+    return mad, z_statistics
 
 # Simulation configuration variables
-count = 0
-num_trials = 1000
+mad_count = 0
+z_count = 0
+num_trials = 1
 origin_size = 42221
-origin_threshold = 0.0019
+mad_threshold = 0.0019
+critical_value = 1.96
 
 # Main simulation loop
 
 for _ in range(num_trials):
     simulated_data = roll_new_dataset(origin_size)
-    mad = calculate_mad(simulated_data)
+    mad, z = measure_conformity(simulated_data, origin_size, critical_value)
     print(mad)
-    if mad >= origin_threshold:
-        count +=1
+    print(len(z))
+
+    '''if mad >= origin_threshold:
+        mad_count +=1'''
 
