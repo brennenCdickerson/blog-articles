@@ -10,18 +10,15 @@ benford_frequencies = np.log10(1 + (1 / first_two_digits))
 def roll_new_dataset(size):
     rng = np.random.default_rng()
     simulated_data = pd.Series(rng.choice(first_two_digits, size, p=benford_frequencies))
-    simulated_counts = simulated_data.value_counts()
     simulated_proportions = simulated_data.value_counts(normalize=True)
-    return simulated_proportions, simulated_counts
+    return simulated_proportions
 
 # Calculate mean absolute deviation of a single simulated dataset
-def measure_conformity(data, size, critical_value):
+def measure_mad(data):
     abs_deviation = []
-    z_statistics = []
     keys = data.keys()
 
     for idx, digits in enumerate(first_two_digits):
-
         expected = benford_frequencies[idx]
 
         if digits in keys:
@@ -32,35 +29,33 @@ def measure_conformity(data, size, critical_value):
         
         deviation = abs(actual - expected)
         abs_deviation.append(deviation)
-        z_statistic = (deviation - (1 / (2 * size))) / np.sqrt((expected * (1 - expected)) / size)
-
-        if z_statistic >= critical_value:
-            z_statistics.append(z_statistic)
-
+      
     mad = np.average(abs_deviation)
+    return mad
 
-    return mad, z_statistics
+# Simulation setup
+is_running = True
 
-# Simulation configuration variables
-mad_count = 0
-z_count = 0
-chi_count = 0
-num_trials = 10000
-origin_size = 210477
-mad_threshold = 0.00024
-critical_value = 1.96
-expected_counts = [i * origin_size for i in benford_frequencies]
+num_trials = 1000
+test_size = 1000
 
-# Main simulation loop
+# Simulation loop
+while is_running:
 
-for _ in range(num_trials):
-    simulated_proportions, simulated_counts = roll_new_dataset(origin_size)
-    mad, z = measure_conformity(simulated_proportions, origin_size, critical_value)
-    chi = calculate_chi_square(simulated_counts.to_list(), expected_counts)
-    print(mad)
-    print(chi)
-    if mad >= mad_threshold:
-        mad_count += 1
+    mad_count = 0
+    mad_threshold = 0.0022
 
+    for _ in range(num_trials):
+        simulated_proportions = roll_new_dataset(test_size)
+        mad = measure_mad(simulated_proportions)
+        if mad >= mad_threshold:
+            mad_count += 1
 
-print(mad_count)
+    if mad_count / num_trials <= 0.05:
+        print(f"Estimated Required Sample Size: {test_size}")
+        is_running = False
+    
+    else:
+        test_size += 50
+        print(f"Sample size too small, new sample size: {test_size}")
+

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from utils import extract_first_digits, create_missing_values, calculate_chi_square, create_graph
+from utils import extract_first_digits, create_missing_values, create_graph
 
 
 # Create list of all possible first two digit combinations from 10 to 99
@@ -20,7 +20,7 @@ purchases_df = pd.read_csv(file_name, usecols=["Value"])
 # Extract first two digits from transaction amounts, drop empty index for numbers < 10
 purchases_df = purchases_df.map(extract_first_digits).dropna()
 size = purchases_df.size
-print(size)
+
 # Expected Benford's Law counts
 expected_counts = [i * size for i in benford_frequencies]
 
@@ -48,10 +48,6 @@ benford_df["Z_STATISTIC"] = ((abs(benford_df["ACTUAL_FREQUENCIES"] - benford_df[
 
 # Calculate test statics applied to entire set
 mean_absolute_deviation = benford_df["ABSOLUTE_DEVIATION"].mean()
-chi_square = calculate_chi_square(benford_df["ACTUAL_COUNTS"].to_list(), benford_df["EXPECTED_COUNTS"].to_list())
-print(mean_absolute_deviation)
-
-#benford_df.to_csv("testoutputCITY.csv")
 
 # Create graph with Benford's Law line over histogram of actual occurences
 create_graph(benford_df["FIRST_TWO_DIGITS"], benford_df["EXPECTED_FREQUENCIES"], 
