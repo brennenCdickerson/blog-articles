@@ -21,7 +21,12 @@ def create_missing_values(full_set, partial_set):
 
     return pd.Series(missing_fill, missing_digit_combinations)
 
-
+def calculate_chi_square(actual, expected):
+    score = 0
+    for obs, exp in zip(actual, expected):
+        score += ((obs - exp) ** 2) / exp
+    return score
+    
 def create_graph(digits, expected, actual, mad, bar_color="silver", line_color="darkblue"):
     fig, ax = plt.subplots()
     bins = digits
