@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from utils import calculate_chi_square
 
 # Initial setup of an array of possible first two digit combintations and their expected frequencies according to Benford's Law
 first_two_digits = np.arange(10, 100)
@@ -44,6 +43,7 @@ while is_running:
 
     mad_count = 0
     mad_threshold = 0.0022
+    fp_rate = 0.05
 
     for _ in range(num_trials):
         simulated_proportions = roll_new_dataset(test_size)
@@ -51,11 +51,12 @@ while is_running:
         if mad >= mad_threshold:
             mad_count += 1
 
-    if mad_count / num_trials <= 0.05:
-        print(f"Estimated Required Sample Size: {test_size}")
+    if mad_count / num_trials <= fp_rate:
+        print(f"Estimated Required Sample Size: {test_size}, {mad_count / num_trials}")
         is_running = False
-    
+
     else:
+        print(f"Estimated Required Sample Size: {test_size}, {mad_count / num_trials}")
         test_size += 50
-        print(f"Sample size too small, new sample size: {test_size}")
+
 

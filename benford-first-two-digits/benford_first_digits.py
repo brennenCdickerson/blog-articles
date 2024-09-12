@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from utils import extract_first_digits, create_missing_values, create_graph
+from utils import extract_first_digits, create_missing_values, create_graph, calculate_chi_square
 
 
 # Create list of all possible first two digit combinations from 10 to 99
@@ -34,11 +34,17 @@ if actual_proportions.size < 90:
     missing_counts = create_missing_values(first_two_digits, actual_counts)
     complete_actual_proportions = pd.concat([actual_proportions, missing_proportions]).sort_index()
     complete_actual_counts = pd.concat([actual_counts, missing_counts]).sort_index()
-    d = {"FIRST_TWO_DIGITS": first_two_digits, "EXPECTED_COUNTS": expected_counts, "ACTUAL_COUNTS": complete_actual_counts, "EXPECTED_FREQUENCIES": benford_frequencies,
-                 "ACTUAL_FREQUENCIES": complete_actual_proportions}
+    d = {"FIRST_TWO_DIGITS": first_two_digits, 
+         "EXPECTED_COUNTS": expected_counts, 
+         "ACTUAL_COUNTS": complete_actual_counts, 
+         "EXPECTED_FREQUENCIES": benford_frequencies,
+         "ACTUAL_FREQUENCIES": complete_actual_proportions}
 else:
-    d = {"FIRST_TWO_DIGITS": first_two_digits, "EXPECTED_COUNTS": expected_counts, "ACTUAL_COUNTS": actual_counts.sort_index(), "EXPECTED_FREQUENCIES": benford_frequencies,
-                 "ACTUAL_FREQUENCIES": actual_proportions.sort_index()}
+    d = {"FIRST_TWO_DIGITS": first_two_digits, 
+         "EXPECTED_COUNTS": expected_counts, 
+         "ACTUAL_COUNTS": actual_counts.sort_index(), 
+         "EXPECTED_FREQUENCIES": benford_frequencies,
+         "ACTUAL_FREQUENCIES": actual_proportions.sort_index()}
 
 # Create dataframe from lists / pandas series, create calculated column showing deviation from expected
 benford_df = pd.DataFrame(data=d)
@@ -49,7 +55,11 @@ benford_df["Z_STATISTIC"] = ((abs(benford_df["ACTUAL_FREQUENCIES"] - benford_df[
 # Calculate test statics applied to entire set
 mean_absolute_deviation = benford_df["ABSOLUTE_DEVIATION"].mean()
 
+chi2 = calculate_chi_square(benford_df["ACTUAL_COUNTS"].to_list(), benford_df["EXPECTED_COUNTS"].to_list())
+
 # Create graph with Benford's Law line over histogram of actual occurences
 create_graph(benford_df["FIRST_TWO_DIGITS"], benford_df["EXPECTED_FREQUENCIES"], 
              benford_df["ACTUAL_FREQUENCIES"], mean_absolute_deviation)
 
+print(benford_df.head())
+print(chi2)

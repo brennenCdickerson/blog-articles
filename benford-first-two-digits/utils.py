@@ -38,5 +38,4 @@ def create_graph(digits, expected, actual, mad, bar_color="silver", line_color="
     plt.xticks(np.arange(10, 91, 10))
     plt.xlim(left=9, right=99)
     plt.show()
-
     return fig, ax
