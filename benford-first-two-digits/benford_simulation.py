@@ -35,28 +35,33 @@ def measure_mad(data):
 # Simulation setup
 is_running = True
 
-num_trials = 1000
-test_size = 1000
+# Number of trials, i.e., number of synthetic distributions tested
+num_trials = 2500
+
+# Tested sample size n
+n = 1000
+
+# Critical value for mean absolute deviation
+mad_threshold = 0.0022
+
+# Acceptable false positive rate
+fp_rate = 0.05
 
 # Simulation loop
 while is_running:
 
     mad_count = 0
-    mad_threshold = 0.0022
-    fp_rate = 0.05
 
     for _ in range(num_trials):
-        simulated_proportions = roll_new_dataset(test_size)
+        simulated_proportions = roll_new_dataset(n)
         mad = measure_mad(simulated_proportions)
         if mad >= mad_threshold:
             mad_count += 1
 
     if mad_count / num_trials <= fp_rate:
-        print(f"Estimated Required Sample Size: {test_size}, {mad_count / num_trials}")
+        print(f"Sample Size: {n}, False positive rate: {mad_count / num_trials}")
         is_running = False
 
     else:
-        print(f"Estimated Required Sample Size: {test_size}, {mad_count / num_trials}")
-        test_size += 50
-
-
+        print(f"Sample Size: {n}, False positive rate: {mad_count / num_trials}")
+        n += 50
