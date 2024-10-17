@@ -1,5 +1,6 @@
 import requests
-
+import json
+from datetime import *
 
 headers = {"User-Agent" : "PLACEHOLDER"}
 
@@ -36,3 +37,70 @@ def get_submissions(cik):
     ).json()
     return company_submissions
 
+def get_form_list(all_submissions, form_type="10-K"):
+    form_list = [accession_num for accession_num, form
+                 in zip(all_submissions["filings"]["recent"]["accessionNumber"], all_submissions["filings"]["recent"]["form"])
+                 if form == form_type]
+    return form_list
+
+
+def get_concept(cik, tag, unit):
+    raw_concept = requests.get(
+        f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}/us-gaap/{tag}.json",
+        headers=headers
+    ).json()
+
+
+    processed_concept = [fact for fact in raw_concept["units"][unit] if "frame" in fact]
+    print(len(processed_concept))
+    return processed_concept
+
+
+def get_concept_alt(cik, tag, unit):
+    raw_concept = requests.get(
+        f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}/us-gaap/{tag}.json",
+        headers=headers
+    ).json()
+   
+    processed_concept = []
+    duplicate_tracker = []
+
+
+    for fact in raw_concept["units"][unit]:
+        temp = {fact["end"], fact["val"]}
+
+
+        # is this piece even necessary? Maybe fix / revisit
+        if not processed_concept:
+            processed_concept.append(fact)
+            duplicate_tracker.append(temp)
+
+
+        elif temp not in duplicate_tracker:
+            processed_concept.append(fact)
+            duplicate_tracker.append(temp)
+
+
+    print(len(processed_concept))
+    return processed_concept
+
+
+def find_start_end_diff(data):
+    count = 0
+    for fact in data:
+        period_start = datetime.strptime(fact["start"], "%Y-%m-%d")
+        period_end = datetime.strptime(fact["end"], "%Y-%m-%d")
+        diff = period_end - period_start
+        if diff.days > 121 and diff.days < 335:
+            count += 1
+    print(count)
+    return count
+
+
+def count_same_date_diff_val(data):
+    pass
+
+
+concept_frame = get_concept("0000200406", "NetIncomeLoss", "USD")
+concept_alt = get_concept_alt("0000200406", "NetIncomeLoss", "USD")
+count_same_date_diff_val(concept_alt)
