@@ -7,7 +7,7 @@ headers = {"User-Agent" : "placeholder"}
 def get_tickers_dict():
     company_tickers = requests.get(
         "https://www.sec.gov/files/company_tickers.json", headers=headers
-    ).json()
+        ).json()
     return company_tickers
 
 
@@ -33,7 +33,7 @@ def company_search(tickers):
 def get_submissions(cik):
     company_submissions = requests.get(
         f"https://data.sec.gov/submissions/CIK{cik}.json", headers=headers
-    ).json()
+        ).json()
     return company_submissions
 
 
@@ -45,27 +45,39 @@ def get_form_list(all_submissions, form_type="10-K"):
 
 
 def get_concept(cik, tag):
-    raw_concept = requests.get(
+    full_concept = requests.get(
         f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}/us-gaap/{tag}.json",
         headers=headers
-    ).json()
-    return raw_concept
+        ).json()
+    return full_concept
 
+def get_facts(cik):
+    facts = requests.get(
+        f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
+        headers=headers
+        ).json()
+    return facts
 
-def handle_duplicates(concept, unit, allow_date_duplicates=False):
-    if allow_date_duplicates:
-        processed_concept = []
-        duplicate_tracker = []
+# TODO Wer're working on this. Getting rid of unit as a parameter and handling all units...not just USD
+def handle_duplicates(concept, allow_date_duplicates=False):
 
-        for fact in concept["units"][unit]:
-            temp = {fact["end"], fact["val"]} 
+    processed_concept = []
 
-            if temp not in duplicate_tracker:
-                processed_concept.append(fact)
-                duplicate_tracker.append(temp)
+    for unit in concept["units"]:
 
-    else:
-        processed_concept = [fact for fact in concept["units"][unit] if "frame" in fact]
+        if allow_date_duplicates:
+            duplicate_tracker = []
+
+            for fact in concept["units"][unit]:
+                temp = {fact["end"], fact["val"]} 
+
+                if temp not in duplicate_tracker:
+                    processed_concept.append(fact)
+                    duplicate_tracker.append(temp)
+
+        else:
+            processed_concept = [fact for fact in concept["units"][unit] if "frame" in fact]
+
     return processed_concept
 
 
@@ -93,5 +105,3 @@ def count_time_period_dupl(data, type="income"):
             tracker.append(temp)
         else:
             print(temp)
-
-
