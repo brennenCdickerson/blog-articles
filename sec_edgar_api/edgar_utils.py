@@ -1,8 +1,7 @@
 import requests
-import json
 from datetime import *
 
-headers = {"User-Agent" : "PLACEHOLDER"}
+headers = {"User-Agent" : "placeholder"}
 
 
 def get_tickers_dict():
@@ -37,6 +36,7 @@ def get_submissions(cik):
     ).json()
     return company_submissions
 
+
 def get_form_list(all_submissions, form_type="10-K"):
     form_list = [accession_num for accession_num, form
                  in zip(all_submissions["filings"]["recent"]["accessionNumber"], all_submissions["filings"]["recent"]["form"])
@@ -44,47 +44,32 @@ def get_form_list(all_submissions, form_type="10-K"):
     return form_list
 
 
-def get_concept(cik, tag, unit):
+def get_concept(cik, tag):
     raw_concept = requests.get(
         f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}/us-gaap/{tag}.json",
         headers=headers
     ).json()
+    return raw_concept
 
 
-    processed_concept = [fact for fact in raw_concept["units"][unit] if "frame" in fact]
-    print(len(processed_concept))
+def handle_duplicates(concept, unit, allow_date_duplicates=False):
+    if allow_date_duplicates:
+        processed_concept = []
+        duplicate_tracker = []
+
+        for fact in concept["units"][unit]:
+            temp = {fact["end"], fact["val"]} 
+
+            if temp not in duplicate_tracker:
+                processed_concept.append(fact)
+                duplicate_tracker.append(temp)
+
+    else:
+        processed_concept = [fact for fact in concept["units"][unit] if "frame" in fact]
     return processed_concept
 
 
-def get_concept_alt(cik, tag, unit):
-    raw_concept = requests.get(
-        f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}/us-gaap/{tag}.json",
-        headers=headers
-    ).json()
-   
-    processed_concept = []
-    duplicate_tracker = []
-
-
-    for fact in raw_concept["units"][unit]:
-        temp = {fact["end"], fact["val"]}
-
-
-        # is this piece even necessary? Maybe fix / revisit
-        if not processed_concept:
-            processed_concept.append(fact)
-            duplicate_tracker.append(temp)
-
-
-        elif temp not in duplicate_tracker:
-            processed_concept.append(fact)
-            duplicate_tracker.append(temp)
-
-
-    print(len(processed_concept))
-    return processed_concept
-
-
+# Will only work on income statement concepts, as only income statement concepts have start and end keys.
 def find_start_end_diff(data):
     count = 0
     for fact in data:
@@ -96,11 +81,17 @@ def find_start_end_diff(data):
     print(count)
     return count
 
+# Another helper for testing.
+def count_time_period_dupl(data, type="income"):
+    tracker = []
+    for fact in data:
+        if type == "income":
+            temp = {fact["start"], fact["end"]}
+        else:
+            temp = fact["end"]
+        if temp not in tracker:
+            tracker.append(temp)
+        else:
+            print(temp)
 
-def count_same_date_diff_val(data):
-    pass
 
-
-concept_frame = get_concept("0000200406", "NetIncomeLoss", "USD")
-concept_alt = get_concept_alt("0000200406", "NetIncomeLoss", "USD")
-count_same_date_diff_val(concept_alt)
