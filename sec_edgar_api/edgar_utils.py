@@ -1,5 +1,6 @@
 import requests
 from datetime import *
+import json
 
 headers = {"User-Agent" : "placeholder"}
 
@@ -51,6 +52,7 @@ def get_concept(cik, tag):
         ).json()
     return full_concept
 
+
 def get_facts(cik):
     facts = requests.get(
         f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
@@ -58,7 +60,7 @@ def get_facts(cik):
         ).json()
     return facts
 
-# TODO Wer're working on this. Getting rid of unit as a parameter and handling all units...not just USD
+
 def handle_duplicates(concept, allow_date_duplicates=False):
 
     processed_concept = []
@@ -96,6 +98,7 @@ def find_start_end_diff(data):
 # Another helper for testing.
 def count_time_period_dupl(data, type="income"):
     tracker = []
+    count = 0
     for fact in data:
         if type == "income":
             temp = {fact["start"], fact["end"]}
@@ -104,4 +107,27 @@ def count_time_period_dupl(data, type="income"):
         if temp not in tracker:
             tracker.append(temp)
         else:
-            print(temp)
+            count += 1
+    print(count)
+    return count
+
+
+'''
+Unused script for testing
+
+company_facts = get_facts("0000200406")
+company_usgaap = company_facts["facts"]["us-gaap"]
+company_dict = {}
+
+concept = get_concept("0000200406", "NetIncomeLoss")
+concept_filter = handle_duplicates(concept, allow_date_duplicates=True)
+print(len(concept_filter))
+
+for company_concept, data in company_usgaap.items():
+    filtered_concept = handle_duplicates(data, allow_date_duplicates=True)
+    company_dict[company_concept] = filtered_concept
+
+with open("company.json", "w") as output:
+    json.dump(company_dict, output)
+    
+    '''
