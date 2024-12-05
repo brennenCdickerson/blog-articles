@@ -2,8 +2,7 @@ import requests
 from datetime import *
 import json
 
-headers = {"User-Agent" : "placeholder"}
-
+headers = {"User-Agent" : "[Your email address here]"}
 
 def get_tickers_dict():
     company_tickers = requests.get(
@@ -62,24 +61,17 @@ def get_facts(cik):
 
 
 def handle_duplicates(concept, allow_date_duplicates=False):
-
     processed_concept = []
-
     for unit in concept["units"]:
-
         if allow_date_duplicates:
             duplicate_tracker = []
-
             for fact in concept["units"][unit]:
                 temp = {fact["end"], fact["val"]} 
-
                 if temp not in duplicate_tracker:
                     processed_concept.append(fact)
                     duplicate_tracker.append(temp)
-
         else:
             processed_concept = [fact for fact in concept["units"][unit] if "frame" in fact]
-
     return processed_concept
 
 
@@ -92,7 +84,6 @@ def find_start_end_diff(data):
         diff = period_end - period_start
         if diff.days > 121 and diff.days < 335:
             count += 1
-    print(count)
     return count
 
 # Another helper for testing.
@@ -108,26 +99,4 @@ def count_time_period_dupl(data, type="income"):
             tracker.append(temp)
         else:
             count += 1
-    print(count)
     return count
-
-
-'''
-Unused script for testing
-
-company_facts = get_facts("0000200406")
-company_usgaap = company_facts["facts"]["us-gaap"]
-company_dict = {}
-
-concept = get_concept("0000200406", "NetIncomeLoss")
-concept_filter = handle_duplicates(concept, allow_date_duplicates=True)
-print(len(concept_filter))
-
-for company_concept, data in company_usgaap.items():
-    filtered_concept = handle_duplicates(data, allow_date_duplicates=True)
-    company_dict[company_concept] = filtered_concept
-
-with open("company.json", "w") as output:
-    json.dump(company_dict, output)
-    
-    '''
